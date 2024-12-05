@@ -4,3 +4,5 @@ log/
 tmp_data/
 *.png
 livox_preprocessed/
+pcds.txt
+*.ply
