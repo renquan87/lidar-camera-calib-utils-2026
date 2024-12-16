@@ -65,7 +65,7 @@ class HKCam:
             sys.exit()
 
         # 设置曝光时间
-        ret = self.cam.MV_CC_SetFloatValue("ExposureTime", 3000)
+        ret = self.cam.MV_CC_SetFloatValue("ExposureTime", 8000)
         if ret != 0:
             print("set exposure time fail! ret[0x%x]" % ret)
             sys.exit()

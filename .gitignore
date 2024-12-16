@@ -6,3 +6,4 @@ tmp_data/
 livox_preprocessed/
 pcds.txt
 *.ply
+*.pyc
