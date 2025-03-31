@@ -242,10 +242,10 @@ if __name__ == "__main__":
     
     # 逆时针
     true_points = np.array([
-        [400., 300, 8410],
-        [400., 0.0, 8410],
-        [0.0, 0.0, 8290],
-        [0.0, 300., 8290]
+        [0., 5227, 800],
+        [0., 5227, 0],
+        [3500, 5011, 0],
+        [3500, 5011, 305]
     ], dtype=np.float32)
     pixel_points = np.array(_anchor.vertexes, dtype=np.float32)
     print(pixel_points)
@@ -275,7 +275,7 @@ if __name__ == "__main__":
     
     # 创建一个窗体框选出鼠标为中心10x10的区域
     cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("frame", 1440, 1080)
+    cv2.resizeWindow("frame", 1920, 1080)
     cv2.imshow("frame", frame)
     
     cv2.setMouseCallback("frame", mouse_callback)
@@ -301,9 +301,22 @@ if __name__ == "__main__":
     uvz = np.array([u, v, z]).T
     
     print('--------------',uvz.shape)
+    
+    # 定义x，y,z上的点，在相机图像中画出xyz轴
+    x = np.array([[0, 0, 0], [15000, 0, 0]], dtype=np.float32)
+    y = np.array([[0, 0, 0], [0, 15000, 0]], dtype=np.float32)
+    z = np.array([[0, 0, 0], [0, 0, 15000]], dtype=np.float32)
+    # 用transformation_matrix将x,y,z转换到相机坐标系下
+    x = cv2.projectPoints(x, rotation_vector, translation_vector, camera_matrix, distortion_coefficients)[0]
+    y = cv2.projectPoints(y, rotation_vector, translation_vector, camera_matrix, distortion_coefficients)[0]
+    z = cv2.projectPoints(z, rotation_vector, translation_vector, camera_matrix, distortion_coefficients)[0]
+    print(x)
+    # print(y)
+    # print(z)
+    # 显示图像
+    
     while True:
         show = back.copy()
-        
         selected_points = get_points_in_box(pc, (cur_mouse[0] - 5, cur_mouse[1] - 5, cur_mouse[0] + 5, cur_mouse[1] + 5))
         if len(selected_points) == 0:
                 continue
@@ -319,7 +332,8 @@ if __name__ == "__main__":
                 center = get_center_mid_distance(box_pcd)
 
         cv2.putText(show, f"Center: {center}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        
+        dis = np.linalg.norm(center)
+        cv2.putText(show, f"Distance: {dis}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         field_xyz = camera_to_field(center)
         
 
@@ -327,6 +341,11 @@ if __name__ == "__main__":
         # cv2.putText(show, f"Depth: {mean_depth}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         # cv2.putText(show, f"Point: {point_xyz}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         cv2.circle(show, cur_mouse, 5, (0, 0, 255), -1)
+        
+        # 画出xyz轴
+        cv2.line(show, tuple(x[0][0].astype(int)), tuple(x[1][0].astype(int)), (0, 0, 255), 2)
+        cv2.line(show, tuple(y[0][0].astype(int)), tuple(y[1][0].astype(int)), (0, 255, 0), 2)
+        cv2.line(show, tuple(z[0][0].astype(int)), tuple(z[1][0].astype(int)), (255, 0, 0), 2)
         
         cv2.imshow("frame", show)
         if cv2.waitKey(16) & 0xFF == ord('q'):

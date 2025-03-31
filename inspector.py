@@ -241,7 +241,7 @@ def generate_depth_map(pc): # 传入的pcd,返回的是一个深度图
     print('y range', uvz[:, 1].min(), uvz[:, 1].max())
     print('z range', uvz[:, 2].min(), uvz[:, 2].max())
     # 按距离填充生成深度图，近距离覆盖远距离
-    width, height = 1440 , 1080
+    width, height = 3072 , 2048
     img_z = np.full((height, width), np.inf)
     valid = np.bitwise_and(np.bitwise_and((u >= 0), (u < width)),
                                np.bitwise_and((v >= 0), (v < height)))

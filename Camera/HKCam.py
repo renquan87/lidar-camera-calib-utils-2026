@@ -47,13 +47,13 @@ class HKCam:
             sys.exit()
 
         # 设置相机高度
-        ret = self.cam.MV_CC_SetIntValue("Height", 1080)
+        ret = self.cam.MV_CC_SetIntValue("Height", 2048)
         if ret != 0:
             print("set height fail! ret[0x%x]" % ret)
             sys.exit()
 
         # 设置相机宽度
-        ret = self.cam.MV_CC_SetIntValue("Width", 1440)
+        ret = self.cam.MV_CC_SetIntValue("Width", 3072)
         if ret != 0:
             print("set width fail! ret[0x%x]" % ret)
             sys.exit()
@@ -71,7 +71,7 @@ class HKCam:
             sys.exit()
 
         # 设置增益
-        ret = self.cam.MV_CC_SetFloatValue("Gain", 15)
+        ret = self.cam.MV_CC_SetFloatValue("Gain", 20)
         if ret != 0:
             print("set gain fail! ret[0x%x]" % ret)
             sys.exit()

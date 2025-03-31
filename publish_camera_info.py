@@ -15,11 +15,13 @@ class CameraInfoPublisher(Node):
         # Fill in the CameraInfo message fields here
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = 'camera_frame'
-        msg.height = 1080
-        msg.width = 1440
+        msg.height = 2048
+        msg.width = 3072
         msg.distortion_model = 'plumb_bob'
-        msg.d = [-0.106887,0.098889,0.000438,-0.000049,0.000000]
-        msg.k = [2359.228979,0.000000,706.732103, 0.000000,2355.309404,554.259586, 0.0, 0.0, 1.0]
+        msg.d = [-0.116015, 0.156237, 0.000245, -0.000297, 0.000000]
+        msg.k = [3405.47215,    0.     , 1512.51235,
+            0.     , 3405.51992, 1004.18006,
+            0.     ,    0.     ,    1.     ]
         msg.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
         msg.p = [1.0, 0.0, 320.0, 0.0, 0.0, 1.0, 240.0, 0.0, 0.0, 0.0, 1.0, 0.0]
         self.publisher_.publish(msg)
