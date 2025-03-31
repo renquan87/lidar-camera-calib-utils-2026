@@ -8,3 +8,8 @@ pcds.txt
 *.ply
 *.pyc
 pcds_camera.txt
+org.txt
+.gitignore
+pcds_camera.txt
+.vscode/settings.json
+Camera/__pycache__/HKCam.cpython-310.pyc
