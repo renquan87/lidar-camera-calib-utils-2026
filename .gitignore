@@ -13,3 +13,6 @@ org.txt
 pcds_camera.txt
 .vscode/settings.json
 Camera/__pycache__/HKCam.cpython-310.pyc
+pc.txt
+pcds_camera.txt
+*.txt
