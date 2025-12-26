@@ -71,7 +71,7 @@ class HKCam:
             sys.exit()
 
         # 设置增益
-        ret = self.cam.MV_CC_SetFloatValue("Gain", 20)
+        ret = self.cam.MV_CC_SetFloatValue("Gain", 19)
         if ret != 0:
             print("set gain fail! ret[0x%x]" % ret)
             sys.exit()
