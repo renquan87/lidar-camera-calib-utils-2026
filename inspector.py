@@ -288,7 +288,7 @@ if __name__ == "__main__":
     sleep(10)
 
     pc = lidar.get_all_pc()
-    np.savetxt("org.txt", pc)
+    np.savetxt("data/org.txt", pc)
     distortion_matrix = np.array([-0.106887,0.098889,0.000438,-4.9e-05,0.0])
     # frame 去畸变
     frame = cv2.undistort(frame, camera_matrix, distortion_matrix)
@@ -308,13 +308,13 @@ if __name__ == "__main__":
     # # 从cupy变为numpy
     pc = cp2np(pc)
     # show_pcd_info(pc)
-    np.savetxt("pc.txt", pc)
+    np.savetxt("data/pc.txt", pc)
     # print(pc)
     image = generate_depth_map(pc)
     # cv2.imshow("frame", image)
     # cv2.waitKey(0)
     
-    cv2.imwrite("frame.png", image)
+    cv2.imwrite("data/frame.png", image)
     # print(len(pc))
     # # 保存点云
     # pcd = o3d.geometry.PointCloud()

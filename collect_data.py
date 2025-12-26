@@ -218,7 +218,7 @@ if __name__ == "__main__":
 
     pc = lidar.get_all_pc()
     show_pcd_info(pc)
-    np.savetxt("pcds.txt", pc)
+    np.savetxt("data/pcds.txt", pc)
     print('Done!')
     
     lidar.stop()

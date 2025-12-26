@@ -1,18 +1,30 @@
+# 构建和安装目录
 build/
 install/
+
+# 日志和临时数据
 log/
 tmp_data/
+data/
+
+# 图像和点云文件
 *.png
-livox_preprocessed/
-pcds.txt
 *.ply
+livox_preprocessed/
+
+# Python缓存文件
 *.pyc
-pcds_camera.txt
-org.txt
-.gitignore
-pcds_camera.txt
-.vscode/settings.json
+__pycache__/
 Camera/__pycache__/HKCam.cpython-310.pyc
+
+# 大数据点云文件（具体文件名）
 pc.txt
 pcds_camera.txt
-*.txt
+pcds.txt
+org.txt
+
+# IDE配置
+.vscode/settings.json
+
+# 注意：不使用 *.txt 通配符，以保留重要的配置文件
+# 如 parameters/lidar_camera.txt
