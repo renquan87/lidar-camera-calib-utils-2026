@@ -2,10 +2,23 @@
 build/
 install/
 
+# C++/CMake 编译文件
+*.o
+*.a
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles/
+Makefile
+
 # 日志和临时数据
 log/
 tmp_data/
 data/
+*.log
+*.tmp
+*.temp
+*.bak
+*.backup
 
 # 图像和点云文件
 *.png
@@ -14,7 +27,15 @@ livox_preprocessed/
 
 # Python缓存文件
 *.pyc
+*.pyo
+*.pyd
 __pycache__/
+*.egg-info/
+dist/
+venv/
+.venv/
+env/
+.pytest_cache/
 Camera/__pycache__/HKCam.cpython-310.pyc
 
 # 大数据点云文件（具体文件名）
@@ -23,8 +44,18 @@ pcds_camera.txt
 pcds.txt
 org.txt
 
-# IDE配置
-.vscode/settings.json
+# IDE和编辑器配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ROS 相关文件
+*.bag
+rosbag2_*/
 
 # 注意：不使用 *.txt 通配符，以保留重要的配置文件
 # 如 parameters/lidar_camera.txt

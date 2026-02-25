@@ -14,3 +14,7 @@ parameters/lidar_camera中填入T_camera_lidar
 ## 引用
 
 如果您在研究中使用了这个工具包，请引用本仓库。
+
+
+
+./copy_calib_yaml.sh将相机标定结果复制到param中

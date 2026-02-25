@@ -10,6 +10,7 @@ from sensor_msgs.msg import PointCloud2
 import sensor_msgs_py.point_cloud2 as pc2
 import sys
 import cupy as cp
+import os
 
 sys.path.append("./Camera")
 from HKCam import *
@@ -278,10 +279,13 @@ def generate_depth_map(pc): # 传入的pcd,返回的是一个深度图
     return img_z
 
 if __name__ == "__main__":
+    # 确保data目录存在
+    os.makedirs("data", exist_ok=True)
+    
     cam = HKCam(0)
     frame = cam.getFrame()
     
-    cv2.imwrite("ori.png", frame)
+    cv2.imwrite("data/ori.png", frame)
     # cv2.waitKey(0)
     lidar = Lidar()
     lidar.start()

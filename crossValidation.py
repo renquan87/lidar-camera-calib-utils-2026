@@ -9,6 +9,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import PointCloud2
 import sensor_msgs_py.point_cloud2 as pc2
 import sys
+import os
 
 import yaml
 
@@ -144,15 +145,18 @@ def generate_3d_points(pc):
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(xyz)
     pcd.colors = o3d.utility.Vector3dVector(bgr)
-    o3d.io.write_point_cloud("colored_point_cloud.ply", pcd)
+    o3d.io.write_point_cloud("data/colored_point_cloud.ply", pcd)
     o3d.visualization.draw_geometries([pcd])
     
 
 
 if __name__ == "__main__":
+    # 确保data目录存在
+    os.makedirs("data", exist_ok=True)
+    
     global width, height, frame
     
-    frame = cv2.imread('img.png')
+    frame = cv2.imread('data/img.png')
     width = frame.shape[1]
     height = frame.shape[0]
     # 调用函数读取相机参数
@@ -163,7 +167,7 @@ if __name__ == "__main__":
     print('lidar2camera:',lidar2camera)
     # 读取pcds.txt
     # 使用numpy加载点云文件
-    pc = np.loadtxt('pcds.txt')
+    pc = np.loadtxt('data/pcds.txt')
     show_pcd_info(pc)
     
     # 将点云转换到相机坐标系下
@@ -175,7 +179,7 @@ if __name__ == "__main__":
     # 生成深度图
     depth_map = generate_depth_image(pc)
     # 保存深度图
-    cv2.imwrite('depth_map.png', depth_map)
+    cv2.imwrite('data/depth_map.png', depth_map)
     
     
     # 生成3d点云

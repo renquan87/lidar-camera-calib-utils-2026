@@ -11,6 +11,7 @@ import sensor_msgs_py.point_cloud2 as pc2
 import sys
 import cupy as cp
 import yaml
+import os
 sys.path.append("./Camera")
 from HKCam import *
 import cv2
@@ -201,6 +202,9 @@ load_camera_parameters('./parameters/ost.yaml')
 
 
 if __name__ == "__main__":
+    # 确保data目录存在
+    os.makedirs("data", exist_ok=True)
+    
     lidar = Lidar()
     lidar.start()
     print("Collecting Data ...")
@@ -209,12 +213,12 @@ if __name__ == "__main__":
     cam = HKCam(0)
     frame = cam.getFrame()
     frame = cv2.undistort(frame, camera_matrix, distortion_coefficients)
-    cv2.imwrite("img.png", frame)
+    cv2.imwrite("data/img.png", frame)
     # cv2.waitKey(0)
     print("Gathering PCDS...")
     
     # 保存10s点云
-    sleep(10)
+    sleep(1)
 
     pc = lidar.get_all_pc()
     show_pcd_info(pc)

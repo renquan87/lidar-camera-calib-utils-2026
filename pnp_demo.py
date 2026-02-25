@@ -209,7 +209,7 @@ def camera_to_field( point):
 if __name__ == "__main__":
     global width, height, frame
     
-    frame = cv2.imread('img.png')
+    frame = cv2.imread('data/img.png')
     back = frame.copy()
     width = frame.shape[1]
     height = frame.shape[0]
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     print('lidar2camera:',lidar2camera)
     # 读取pcds.txt
     # 使用numpy加载点云文件
-    pc = np.loadtxt('pcds.txt')
+    pc = np.loadtxt('data/pcds.txt')
     show_pcd_info(pc)
     
     # 将点云转换到相机坐标系下
