@@ -4,7 +4,7 @@
 
 ## 注意事项
 
-parameters/lidar_camera中填入T_camera_lidar
+parameters/lidar_camera中是雷达到相机，所以calib.json需要转成 4×4 矩阵，求逆，填入parameters/lidar_camera。
 
 ## 许可证
 

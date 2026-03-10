@@ -26,13 +26,14 @@ public:
 
 private:
     image_transport::Publisher                              pub_img_;
+    rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr pub_cam_info_;
     std::unique_ptr<camera_info_manager::CameraInfoManager> cam_info_;
     // msgs
     sensor_msgs::msg::Image      img_msg_;
     sensor_msgs::msg::CameraInfo cam_info_msg_;
 
-    rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Logger               logger_;
+    std::string                  camera_info_url_;
 
     std::shared_ptr<HKcam> cam_;
     std::thread            capture_thread_;

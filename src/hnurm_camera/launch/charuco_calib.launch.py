@@ -5,7 +5,6 @@ from datetime import datetime
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.actions import ExecuteProcess
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
@@ -26,12 +25,10 @@ def backup_old_calibration():
     if not os.path.exists(CALIB_FILE):
         return
     os.makedirs(BACKUP_DIR, exist_ok=True)
-    # 用文件的修改时间作为备份名
     mtime = os.path.getmtime(CALIB_FILE)
     date_str = datetime.fromtimestamp(mtime).strftime('%Y%m%d_%H%M%S')
     backup_name = f'ost_{date_str}.yaml'
     backup_path = os.path.join(BACKUP_DIR, backup_name)
-    # 避免重复备份
     if not os.path.exists(backup_path):
         shutil.copy2(CALIB_FILE, backup_path)
         print(f'[calib] 已备份旧标定文件 -> backups/{backup_name}')
@@ -44,10 +41,8 @@ def generate_launch_description():
     backup_old_calibration()
 
     camera_dir = get_package_share_directory('hnurm_camera')
-    params_file = LaunchConfiguration('params_file')
 
     # camera_info_url 使用 file:// 协议指向项目 parameters 目录
-    # camera_info_manager 收到 set_camera_info 请求后会写入此路径
     camera_info_url = f'file://{CALIB_FILE}'
 
     cam_node = Node(
@@ -60,13 +55,21 @@ def generate_launch_description():
         ]
     )
 
-    # 用 Node 而非 ExecuteProcess 启动 cameracalibrator，这样才能接收 ROS 参数
+    # ChArUco 标定节点
+    # ChArUco 板参数：12x9 格子，格子边长 30mm，ArUco 标记边长 22.5mm，字典 5x5_1000
+    # 优势：对遮挡和反光更鲁棒，不需要检测到所有角点
     camera_calibration_node = Node(
         package='camera_calibration',
         executable='cameracalibrator',
         parameters=[{'calibration_save_path': CALIB_FILE}],
-        arguments=['--size', '10x7', '--square', '0.05',  # 11 * 8，0.02是小棋盘格，10 * 7,0.05是大棋盘格
-                   '--no-service-check'],
+        arguments=[
+            '--pattern', 'charuco',
+            '--size', '12x9',
+            '--square', '0.03',
+            '--charuco_marker_size', '0.0225',
+            '--aruco_dict', '5x5_1000',
+            '--no-service-check',
+        ],
     )
 
     return LaunchDescription([

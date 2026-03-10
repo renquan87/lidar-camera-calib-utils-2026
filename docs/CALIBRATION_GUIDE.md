@@ -92,6 +92,18 @@ parameters/ost.yaml              preprocessed/calib.json
 
 ## 四、相机内参标定（本项目）
 
+本项目支持两种标定方式：**普通棋盘格**和 **ChArUco 板**（推荐）。
+
+### 4.0 两种标定方式对比
+
+| | 普通棋盘格 (`calib.launch.py`) | ChArUco 板 (`charuco_calib.launch.py`) |
+|---|---|---|
+| **标定板** | 8×11 普通黑白棋盘格（格子 50mm） | 12×9 ChArUco 板（格子 30mm，标记 22.5mm） |
+| **反光容忍度** | 差，反光区域的角点会全部失效 | **好**，每个角点独立检测，部分反光不影响其余角点 |
+| **遮挡容忍度** | 必须全部角点可见 | **部分遮挡也能使用** |
+| **精度** | 依赖 cornerSubPix 精化，受材质影响大 | ArUco 标记辅助定位，更稳定 |
+| **推荐场景** | 哑光标定板 + 均匀光照 | **反光材料 / 光照不均匀 / 一般场景（推荐）** |
+
 ### 4.1 原理
 
 相机内参描述了相机的光学特性：
@@ -102,7 +114,9 @@ parameters/ost.yaml              preprocessed/calib.json
 
 这些参数通过拍摄已知尺寸的棋盘格标定板，利用多张不同角度的照片求解。
 
-### 4.2 操作步骤
+### 4.2 方式一：普通棋盘格标定
+
+适用于哑光材质的棋盘格标定板。
 
 ```bash
 # 1. 构建项目
@@ -123,22 +137,86 @@ ros2 launch hnurm_camera calib.launch.py
 # 4. 当 "CALIBRATE" 按钮变为可点击状态时，点击它
 #    等待计算完成（可能需要几十秒）
 
-# 5. 点击 "SAVE" 保存结果
+# 5. 标定完成后查看 RMS 重投影误差（右侧面板显示）
+#    - < 0.5 优秀，< 1.0 可用，> 1.0 建议重新标定
 
-# 6. Ctrl+C 结束程序
+# 6. 点击 "COMMIT" 自动保存到 parameters/ost.yaml（旧文件自动备份到 backups/）
+#    或点击 "SAVE" 保存到 /tmp/calibrationdata.tar.gz
+
+# 7. Ctrl+C 结束程序
 ```
 
-### 4.3 产出文件
+### 4.3 方式二：ChArUco 板标定（推荐）
 
-标定结果保存在 `/tmp/calibrationdata.tar.gz`，其中包含 `ost.yaml`。
+**推荐使用此方式**，特别是当标定板材料有反光时。ChArUco 板结合了棋盘格的亚像素精度和 ArUco 标记的鲁棒检测，即使部分区域被遮挡或反光也能正常标定。
 
-运行复制脚本提取：
+**使用的 ChArUco 板参数**（与 hnuvision_ros2 项目共用同一块板）：
+- 格子数：12 × 9
+- 格子边长：30mm
+- ArUco 标记边长：22.5mm
+- ArUco 字典：5x5_1000
+
+```bash
+# 1. 构建项目（如果已构建可跳过）
+cd /data/projects/radar/lidar_camera_calib_utils
+colcon build --symlink-install
+source install/setup.bash
+
+# 2. 启动 ChArUco 标定程序
+ros2 launch hnurm_camera charuco_calib.launch.py
+
+# 3. 在相机视野内移动 ChArUco 标定板
+#    - 同样需要覆盖整个视野、不同角度、不同距离
+#    - 与棋盘格不同：即使有部分反光或遮挡也会被采集
+#    - 界面上的进度条会逐渐变满
+
+# 4. 当 "CALIBRATE" 按钮变为可点击状态时，点击它
+#    等待计算完成
+
+# 5. 标定完成后查看 RMS 重投影误差（右侧面板显示）
+
+# 6. 点击 "COMMIT" 自动保存到 parameters/ost.yaml
+#    或点击 "SAVE" 保存到 /tmp/calibrationdata.tar.gz
+
+# 7. Ctrl+C 结束程序
+```
+
+> **注意**：如果没有 ChArUco 板，可以使用 OpenCV 生成并打印一张：
+> ```bash
+> python3 -c "
+> import cv2
+> aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_1000)
+> board = cv2.aruco.CharucoBoard((12, 9), 0.03, 0.0225, aruco_dict)
+> img = board.generateImage((2400, 1800), marginSize=50)
+> cv2.imwrite('charuco_board_12x9.png', img)
+> print('已生成 charuco_board_12x9.png，按实际尺寸打印（格子 30mm）')
+> "
+> ```
+
+### 4.4 产出文件与保存方式
+
+标定完成后有两种保存方式：
+
+#### 方式 A：COMMIT（推荐）
+
+点击 **COMMIT** 按钮，标定结果会通过 `set_camera_info` 服务自动保存到项目目录：
+
+```
+parameters/ost.yaml              ← 最新标定结果（自动覆盖）
+parameters/backups/ost_20260310_153022.yaml  ← 旧文件自动备份（带时间戳）
+```
+
+此方式由 `camera_info_url` 参数控制，launch 文件中已配置好，无需手动操作。
+
+#### 方式 B：SAVE + 手动复制
+
+点击 **SAVE** 按钮，结果保存到 `/tmp/calibrationdata.tar.gz`，然后手动提取：
 
 ```bash
 ./copy_calib_yaml.sh
 ```
 
-这会将 `ost.yaml` 复制到 `parameters/ost.yaml`，内容示例：
+#### ost.yaml 内容示例：
 
 ```yaml
 camera_matrix:
@@ -149,7 +227,7 @@ distortion_coefficients:
   data: [-0.121699, 0.203650, -0.009301, -0.002396, 0.000000]  # k1, k2, p1, p2, k3
 ```
 
-### 4.4 如何应用到 hnurm_radar
+### 4.5 如何应用到 hnurm_radar
 
 将 `ost.yaml` 中的数值手动填入 `hnurm_radar/configs/converter_config.yaml`：
 
@@ -196,20 +274,28 @@ python3 inspector.py          # 可视化检查
 |------|------|------|
 | `parameters/ost.yaml` | 相机内参（焦距、光心、畸变） | 相机内参标定产出 |
 | `parameters/lidar_camera.txt` | T_camera_lidar 4×4 变换矩阵 | calib_ws 外参标定产出（经转换） |
-| `parameters/backups/` | 历史标定结果备份 | copy_calib_yaml.sh 自动备份 |
+| `parameters/backups/ost_*.yaml` | 历史标定结果备份（带时间戳） | COMMIT 时自动备份 / copy_calib_yaml.sh |
 
 ---
 
 ## 七、常见问题
 
 **Q: 标定板用什么规格？**
-A: ROS 默认的 cameracalibrator 使用 8×6 的棋盘格（内角点数），格子大小需要在 launch 文件中指定。
+A: 本项目支持两种标定板：
+- **普通棋盘格**：8×11（内角点 7×10），格子边长 50mm，`calib.launch.py`
+- **ChArUco 板（推荐）**：12×9，格子 30mm，标记 22.5mm，字典 5x5_1000，`charuco_calib.launch.py`
+
+**Q: ChArUco 板和普通棋盘格有什么区别？**
+A: ChArUco 板在每个白色方格内嵌入了 ArUco 二维码标记。这使得即使标定板部分被遮挡或有反光，仍然可以正确检测到可见的角点。普通棋盘格在有任何角点不可见时整帧数据将丢弃。
 
 **Q: 标定时 CALIBRATE 按钮一直灰色？**
 A: 需要采集足够多不同角度和位置的样本。确保标定板在视野的各个区域都出现过，并且有不同的倾斜角度。
 
 **Q: 标定误差多少算合格？**
-A: 标定完成后界面会显示重投影误差（reprojection error），一般 < 0.5 像素算优秀，< 1.0 像素算可用。
+A: 标定完成后界面右侧会显示 RMS 重投影误差（reprojection error），一般 < 0.5 像素算优秀，< 1.0 像素算可用，> 1.0 建议重新标定。
+
+**Q: COMMIT 和 SAVE 有什么区别？**
+A: **COMMIT** 会通过 ROS 的 `set_camera_info` 服务将标定结果直接保存到项目目录 `parameters/ost.yaml`（旧文件自动备份到 `parameters/backups/`）。**SAVE** 只是打包保存到 `/tmp/calibrationdata.tar.gz`，需要手动复制。推荐使用 COMMIT。
 
 **Q: 换了分辨率需要重新标定吗？**
 A: 如果相机硬件分辨率改变了（比如从 3072×2048 改成 4024×3036），需要重新标定。内参值会随分辨率变化。
